@@ -2,6 +2,8 @@ package com.meysamzamani.datasynchronizer.domain.contract;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(name = Contract.TABLE_NAME)
 public class Contract {
@@ -10,19 +12,19 @@ public class Contract {
 
     @Id
     @Column(name = "auftragid")
-    private String auftragId;
+    private Long auftragId;
     @Column(nullable = false, name = "artikelnummer")
     private String artikelNummer;
     @Column(nullable = false, name = "created")
-    private String created;
+    private LocalDate created;
     @Column(nullable = false, name = "lastchange")
-    private String lastChange;
+    private LocalDate lastChange;
     @Column(nullable = false, name = "kundeid")
-    private String kundeId;
+    private Long kundeId;
 
     public Contract() {}
 
-    public Contract(String auftragId, String artikelNummer, String created, String lastChange, String kundeId) {
+    public Contract(Long auftragId, String artikelNummer, LocalDate created, LocalDate lastChange, Long kundeId) {
         this.auftragId = auftragId;
         this.artikelNummer = artikelNummer;
         this.created = created;
@@ -30,7 +32,7 @@ public class Contract {
         this.kundeId = kundeId;
     }
 
-    public String getAuftragId() {
+    public Long getAuftragId() {
         return auftragId;
     }
 
@@ -38,15 +40,15 @@ public class Contract {
         return artikelNummer;
     }
 
-    public String getCreated() {
+    public LocalDate getCreated() {
         return created;
     }
 
-    public String getLastChange() {
+    public LocalDate getLastChange() {
         return lastChange;
     }
 
-    public String getKundeId() {
+    public Long getKundeId() {
         return kundeId;
     }
 }

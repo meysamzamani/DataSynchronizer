@@ -2,6 +2,8 @@ package com.meysamzamani.datasynchronizer.domain.shared;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(name = Dummy.TABLE_NAME)
 public class Dummy {
@@ -15,15 +17,15 @@ public class Dummy {
     @Column(nullable = false, name = "artikelnummer")
     private String aritkelNummer;
     @Column(nullable = false, name = "created")
-    private String created;
+    private LocalDate created;
     @Column(nullable = false, name = "lastchange")
-    private String lastChange;
+    private LocalDate lastChange;
     @Column(nullable = false, name = "kundeid")
     private Long kundeId;
 
     public Dummy() {}
 
-    public Dummy(String aritkelNummer, String created, String lastChange, Long kundeId) {
+    public Dummy(String aritkelNummer, LocalDate created, LocalDate lastChange, Long kundeId) {
         this.aritkelNummer = aritkelNummer;
         this.created = created;
         this.lastChange = lastChange;
@@ -38,11 +40,11 @@ public class Dummy {
         return aritkelNummer;
     }
 
-    public String getCreated() {
+    public LocalDate getCreated() {
         return created;
     }
 
-    public String getLastChange() {
+    public LocalDate getLastChange() {
         return lastChange;
     }
 
