@@ -1,5 +1,6 @@
 package com.meysamzamani.datasynchronizer.domain.contract;
 
+import com.meysamzamani.datasynchronizer.domain.customer.Customer;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -11,6 +12,8 @@ public class Contract {
     public static final String TABLE_NAME= "auftraege";
 
     @Id
+    @SequenceGenerator(name = "contract_sequence", sequenceName = "contract_sequence", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "contract_sequence")
     @Column(name = "auftragid")
     private Long auftragId;
     @Column(nullable = false, name = "artikelnummer")
@@ -19,17 +22,17 @@ public class Contract {
     private LocalDate created;
     @Column(nullable = false, name = "lastchange")
     private LocalDate lastChange;
-    @Column(nullable = false, name = "kundeid")
-    private Long kundeId;
+    @ManyToOne
+    @JoinColumn(name="kundeid", nullable=false)
+    private Customer kunde;
 
     public Contract() {}
 
-    public Contract(Long auftragId, String artikelNummer, LocalDate created, LocalDate lastChange, Long kundeId) {
-        this.auftragId = auftragId;
+    public Contract(String artikelNummer, LocalDate created, LocalDate lastChange, Customer kunde) {
         this.artikelNummer = artikelNummer;
         this.created = created;
         this.lastChange = lastChange;
-        this.kundeId = kundeId;
+        this.kunde = kunde;
     }
 
     public Long getAuftragId() {
@@ -48,7 +51,7 @@ public class Contract {
         return lastChange;
     }
 
-    public Long getKundeId() {
-        return kundeId;
+    public Customer getKunde() {
+        return kunde;
     }
 }
