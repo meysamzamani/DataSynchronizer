@@ -13,8 +13,8 @@ public interface StorageManager {
     public List<Bucket> getBuckets();
     public Bucket createBucket(String bucketName);
     public void deleteBucket(String bucketName);
-    public PutObjectResult putObject(String bucketName, String fileKey, File file);
-    public S3Object getObject(String bucketName, String fileKey);
+    public PutObjectResult putObject(String bucketName, String fileName, File file);
+    public S3Object getObject(String bucketName, String fileName);
     public ObjectListing filesList(String bucketName);
 
 }

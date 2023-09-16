@@ -33,13 +33,13 @@ public class S3Manager implements StorageManager {
     }
 
     @Override
-    public PutObjectResult putObject(String bucketName, String fileKey, File file) {
-        return amazonS3.putObject(bucketName, fileKey, file);
+    public PutObjectResult putObject(String bucketName, String fileName, File file) {
+        return amazonS3.putObject(bucketName, fileName, file);
     }
 
     @Override
-    public S3Object getObject(String bucketName, String fileKey) {
-        return amazonS3.getObject(bucketName, fileKey);
+    public S3Object getObject(String bucketName, String fileName) {
+        return amazonS3.getObject(bucketName, fileName);
     }
 
     @Override
