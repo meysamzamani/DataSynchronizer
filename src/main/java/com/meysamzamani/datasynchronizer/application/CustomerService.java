@@ -1,9 +1,11 @@
 package com.meysamzamani.datasynchronizer.application;
 
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.meysamzamani.datasynchronizer.domain.customer.Customer;
 import com.meysamzamani.datasynchronizer.domain.customer.CustomerSyncInformation;
 import com.meysamzamani.datasynchronizer.infrastructure.database.CustomerRepository;
 import com.meysamzamani.datasynchronizer.infrastructure.database.CustomerSyncInformationRepository;
+import com.meysamzamani.datasynchronizer.infrastructure.storage.S3Manager;
 import com.meysamzamani.datasynchronizer.presentation.exception.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,9 @@ public class CustomerService {
 
     @Autowired
     private CustomerRepository customerRepository;
+
+    @Autowired
+    private S3Manager s3Manager;
 
     @Autowired
     private CustomerSyncInformationRepository customerSyncInformationRepository;
@@ -41,7 +46,7 @@ public class CustomerService {
         customerRepository.delete(customer);
     }
 
-    public void syncCustomerToStorage() {
+    public void syncCustomerToStorage() throws AmazonS3Exception {
         Optional<CustomerSyncInformation> customerSyncInformation = customerSyncInformationRepository.findTopByOrderByIdAsc();
         if (customerSyncInformation.isPresent()) {
             // TODO: Develop feature to sync data to S3 storage from offset
