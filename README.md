@@ -99,5 +99,4 @@ Make sure to replace <YOUR_DATABASE_USERNAME>, <YOUR_DATABASE_PASSWORD>, <YOUR_A
 - DELETE /api/v1.0/customers/{customerId}: Delete a customer.
 
 ### Synchronization
-The project includes a scheduled task CustomerScheduler that runs every 3 hours (configured in @Scheduled(cron = "0 */3 * * * *")). This task synchronizes new customer data to an S3 bucket. Customers with a higher ID than the last synchronized customer are selected and converted to CSV files, which are then uploaded to the S3 bucket.
-butions to this project are welcome. Please fork the repository, make your changes, and submit a pull request.
+The project includes a scheduled task CustomerScheduler that runs every 3 hours (configured in @Scheduled(cron = "0 */3 * * * *")). This task synchronizes new customer data to an S3 bucket. Customers with a higher ID than the last synchronized customer are selected and converted to CSV files, which are then uploaded to the S3 bucket. Each file contains information about the customers of a country.
