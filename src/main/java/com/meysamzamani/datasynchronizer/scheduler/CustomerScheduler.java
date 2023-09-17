@@ -12,7 +12,7 @@ public class CustomerScheduler {
     private CustomerService customerService;
 
     // Specify the cron expression to run the job every 3 hours
-    @Scheduled(cron = "0 */1 * * * *")
+    @Scheduled(cron = "0 0 */3 * * *")
     public void syncData() {
         customerService.findNewCustomerAndSync();
     }
