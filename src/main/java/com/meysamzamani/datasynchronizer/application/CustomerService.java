@@ -91,11 +91,12 @@ public class CustomerService {
             customerSyncInformationRepository.save(savedCustomerSyncInfo);
 
             PutObjectResult result = s3Manager.putObject(bucket, filePath, new File(filePath));
-        } catch (IOException | AmazonS3Exception e) {
-            customerSyncInformationRepository.delete(savedCustomerSyncInfo);
-        } finally {
+
             savedCustomerSyncInfo.setActive(false);
             customerSyncInformationRepository.save(savedCustomerSyncInfo);
+
+        } catch (IOException | AmazonS3Exception e) {
+            customerSyncInformationRepository.delete(savedCustomerSyncInfo);
         }
     }
 
