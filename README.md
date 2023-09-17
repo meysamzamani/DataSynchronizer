@@ -27,7 +27,7 @@ Before running this project, make sure you have the following prerequisites inst
 ### Installation
 1. Clone the repository:
    ```sh
-   git clone <repository-url>
+   git clone https://github.com/meysamzamani/DataSynchronizer.git
    
 2. Navigate to the project directory:
    ```sh
