@@ -1,15 +1,24 @@
 package com.meysamzamani.datasynchronizer.application;
 
 import com.amazonaws.services.s3.model.AmazonS3Exception;
+import com.amazonaws.services.s3.model.PutObjectResult;
 import com.meysamzamani.datasynchronizer.domain.customer.Customer;
 import com.meysamzamani.datasynchronizer.domain.customer.CustomerSyncInformation;
 import com.meysamzamani.datasynchronizer.infrastructure.database.CustomerRepository;
 import com.meysamzamani.datasynchronizer.infrastructure.database.CustomerSyncInformationRepository;
 import com.meysamzamani.datasynchronizer.infrastructure.storage.S3Manager;
 import com.meysamzamani.datasynchronizer.presentation.exception.NotFoundException;
+import com.meysamzamani.datasynchronizer.utils.CSVUtility;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,6 +33,15 @@ public class CustomerService {
 
     @Autowired
     private CustomerSyncInformationRepository customerSyncInformationRepository;
+
+    @Autowired
+    private CSVUtility<Customer> customerCSVUtility;
+
+    @Value("${com.meysamzamani.data_synchronizer.location}")
+    private Path location;
+
+    @Value("${com.meysamzamani.data_synchronizer.storage.bucket}")
+    private String bucket;
 
     public List<Customer> getCustomers() {
         return customerRepository.findAll();
@@ -46,15 +64,48 @@ public class CustomerService {
         customerRepository.delete(customer);
     }
 
-    public void syncCustomerToStorage() throws AmazonS3Exception {
+    public void findNewCustomerAndSync() {
         Optional<CustomerSyncInformation> customerSyncInformation = customerSyncInformationRepository.findTopByOrderByIdAsc();
+
+        List<Customer> customers;
         if (customerSyncInformation.isPresent()) {
-            // TODO: Develop feature to sync data to S3 storage from offset
-            System.out.println("Sync Customer to Storage from offset");
+            if (customerSyncInformation.get().isActive()) {
+                return;
+            }
+            customers = customerRepository.findByKundenIdGreaterThan(customerSyncInformation.get().getMaxCustomerId());
         } else {
-            // TODO: Develop feature to sync data to S3 storage from scratch
-            System.out.println("Sync Customer to Storage from scratch");
+            customers = getCustomers();
         }
+        syncCustomerToStorage(customers);
+    }
+
+    private void syncCustomerToStorage(List<Customer> customers) {
+        Long maxId = findMaximumId(customers);
+        CustomerSyncInformation savedCustomerSyncInfo = customerSyncInformationRepository.save(
+                new CustomerSyncInformation(LocalDate.now(), maxId, "", bucket, true)
+        );
+        try {
+            String filePath = customerCSVUtility.generateCSV(customers, getLocation()+"test.csv");
+
+            savedCustomerSyncInfo.setFilePath(filePath);
+            customerSyncInformationRepository.save(savedCustomerSyncInfo);
+
+            PutObjectResult result = s3Manager.putObject(bucket, filePath, new File(filePath));
+        } catch (IOException | AmazonS3Exception e) {
+            customerSyncInformationRepository.delete(savedCustomerSyncInfo);
+        } finally {
+            savedCustomerSyncInfo.setActive(false);
+            customerSyncInformationRepository.save(savedCustomerSyncInfo);
+        }
+    }
+
+    private Long findMaximumId(List<Customer> customers) {
+        return Collections.max(customers).getKundenId();
+    }
+
+    private Path getLocation() {
+        String userDirectory = new File("").getAbsolutePath();
+        return Paths.get(userDirectory+location);
     }
 
 }

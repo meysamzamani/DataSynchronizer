@@ -14,7 +14,7 @@ public class CustomerScheduler {
     // Specify the cron expression to run the job every 3 hours
     @Scheduled(cron = "0 */1 * * * *")
     public void syncData() {
-        customerService.syncCustomerToStorage();
+        customerService.findNewCustomerAndSync();
     }
 
 }

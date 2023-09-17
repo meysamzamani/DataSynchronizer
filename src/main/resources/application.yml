@@ -22,8 +22,10 @@ server:
 com:
   meysamzamani:
     data_synchronizer:
+      location: /files/
       storage:
         access_key: <YOUR_ACCESS_KEY>
         secret_key: <YOUR_SECRET_KEY>
         endpoint: s3-eu-central-1.ionoscloud.com
         region: us-east-1
+        bucket: customer

@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = Customer.TABLE_NAME)
-public class Customer {
+public class Customer implements Comparable<Customer> {
 
     public static final String TABLE_NAME= "kunde";
 
@@ -84,5 +84,16 @@ public class Customer {
 
     public String getFirmenName() {
         return firmenName;
+    }
+
+    @Override
+    public int compareTo(Customer c) {
+        if (this == c) {
+            return 0;
+        }
+        if(c != null) {
+            return this.kundenId.compareTo(c.getKundenId());
+        }
+        throw new NullPointerException();
     }
 }
