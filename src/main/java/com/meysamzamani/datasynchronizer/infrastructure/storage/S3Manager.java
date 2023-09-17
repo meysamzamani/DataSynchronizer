@@ -9,7 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class S3Manager implements StorageManager {
@@ -29,12 +31,24 @@ public class S3Manager implements StorageManager {
 
     @Override
     public void deleteBucket(String bucketName) {
-        amazonS3.deleteBucket(bucketName);
+        if (isBucketExist(getBuckets(), bucketName)) {
+            amazonS3.deleteBucket(bucketName);
+        }
     }
 
     @Override
-    public PutObjectResult putObject(String bucketName, String fileName, File file) {
-        return amazonS3.putObject(bucketName, fileName, file);
+    public List<PutObjectResult> putObjects(String bucketName, List<String> filePaths) {
+        if (!isBucketExist(getBuckets(), bucketName)) {
+            createBucket(bucketName);
+        }
+
+        List<PutObjectResult> uploadedObjects = new ArrayList<>();
+        for (String path : filePaths) {
+            File file = new File(path);
+            uploadedObjects.add(amazonS3.putObject(bucketName, file.getName(), file));
+        }
+
+        return uploadedObjects;
     }
 
     @Override
@@ -45,5 +59,13 @@ public class S3Manager implements StorageManager {
     @Override
     public ObjectListing filesList(String bucketName) {
         return amazonS3.listObjects(bucketName);
+    }
+
+    private boolean isBucketExist(List<Bucket> buckets, String bucketName) {
+        Bucket existBucket = buckets.stream()
+                .filter(bucket -> bucketName.equals(bucket.getName()))
+                .findAny()
+                .orElse(null);
+        return existBucket != null;
     }
 }

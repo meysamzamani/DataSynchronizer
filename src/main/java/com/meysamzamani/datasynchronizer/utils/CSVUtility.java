@@ -1,10 +1,11 @@
 package com.meysamzamani.datasynchronizer.utils;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
 public interface CSVUtility<T> {
 
-    public String generateCSV(List<T> elements, String filePath) throws IOException;
+    List<String> generateCSV(List<T> elements, Path filePath) throws IOException;
 
 }

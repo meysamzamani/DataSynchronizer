@@ -10,11 +10,11 @@ import java.util.List;
 
 public interface StorageManager {
 
-    public List<Bucket> getBuckets();
-    public Bucket createBucket(String bucketName);
-    public void deleteBucket(String bucketName);
-    public PutObjectResult putObject(String bucketName, String fileName, File file);
-    public S3Object getObject(String bucketName, String fileName);
-    public ObjectListing filesList(String bucketName);
+    List<Bucket> getBuckets();
+    Bucket createBucket(String bucketName);
+    void deleteBucket(String bucketName);
+    List<PutObjectResult> putObjects(String bucketName, List<String> filePaths);
+    S3Object getObject(String bucketName, String fileName);
+    ObjectListing filesList(String bucketName);
 
 }

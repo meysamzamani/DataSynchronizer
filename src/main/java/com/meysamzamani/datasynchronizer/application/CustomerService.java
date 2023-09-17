@@ -1,7 +1,6 @@
 package com.meysamzamani.datasynchronizer.application;
 
 import com.amazonaws.services.s3.model.AmazonS3Exception;
-import com.amazonaws.services.s3.model.PutObjectResult;
 import com.meysamzamani.datasynchronizer.domain.customer.Customer;
 import com.meysamzamani.datasynchronizer.domain.customer.CustomerSyncInformation;
 import com.meysamzamani.datasynchronizer.infrastructure.database.CustomerRepository;
@@ -9,6 +8,7 @@ import com.meysamzamani.datasynchronizer.infrastructure.database.CustomerSyncInf
 import com.meysamzamani.datasynchronizer.infrastructure.storage.S3Manager;
 import com.meysamzamani.datasynchronizer.presentation.exception.NotFoundException;
 import com.meysamzamani.datasynchronizer.utils.CSVUtility;
+import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -17,7 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -68,6 +68,7 @@ public class CustomerService {
         Optional<CustomerSyncInformation> customerSyncInformation = customerSyncInformationRepository.findTopByOrderByIdAsc();
 
         List<Customer> customers;
+
         if (customerSyncInformation.isPresent()) {
             if (customerSyncInformation.get().isActive()) {
                 return;
@@ -76,24 +77,30 @@ public class CustomerService {
         } else {
             customers = getCustomers();
         }
+
+        if (customers.isEmpty()) {
+            return;
+        }
+
         syncCustomerToStorage(customers);
     }
 
     private void syncCustomerToStorage(List<Customer> customers) {
         Long maxId = findMaximumId(customers);
         CustomerSyncInformation savedCustomerSyncInfo = customerSyncInformationRepository.save(
-                new CustomerSyncInformation(LocalDate.now(), maxId, "", bucket, true)
+                new CustomerSyncInformation(LocalDateTime.now(), maxId, bucket, true)
         );
         try {
-            String filePath = customerCSVUtility.generateCSV(customers, getLocation()+"test.csv");
-
-            savedCustomerSyncInfo.setFilePath(filePath);
-            customerSyncInformationRepository.save(savedCustomerSyncInfo);
-
-            PutObjectResult result = s3Manager.putObject(bucket, filePath, new File(filePath));
+            List<String> filePaths = customerCSVUtility.generateCSV(customers, getLocation());
+            s3Manager.putObjects(bucket, filePaths);
 
             savedCustomerSyncInfo.setActive(false);
             customerSyncInformationRepository.save(savedCustomerSyncInfo);
+
+            /**
+             * Please uncomment this line if you want to delet all temp file from your local machine
+             */
+            FileUtils.cleanDirectory(new File(getLocation()+"/"));
 
         } catch (IOException | AmazonS3Exception e) {
             customerSyncInformationRepository.delete(savedCustomerSyncInfo);
